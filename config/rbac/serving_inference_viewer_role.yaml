@@ -1,0 +1,27 @@
+# permissions for end users to view inferences.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: inference-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: kube
+    app.kubernetes.io/part-of: kube
+    app.kubernetes.io/managed-by: kustomize
+  name: inference-viewer-role
+rules:
+- apiGroups:
+  - serving.baize.io
+  resources:
+  - inferences
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - serving.baize.io
+  resources:
+  - inferences/status
+  verbs:
+  - get

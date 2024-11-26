@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - serving.baize.io
+  resources:
+  - models
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - serving.baize.io
+  resources:
+  - models/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - serving.baize.io
+  resources:
+  - models/status
+  verbs:
+  - get
+  - patch
+  - update
