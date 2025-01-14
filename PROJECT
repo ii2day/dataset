@@ -17,20 +17,4 @@ resources:
   kind: Dataset
   path: baize.io/api/kube/api/dataset/v1alpha1
   version: v1alpha1
-- api:
-    crdVersion: v1
-    namespaced: true
-  domain: baize.io
-  group: serving
-  kind: Inference
-  path: baize.io/api/kube/api/serving/v1alpha1
-  version: v1alpha1
-- api:
-    crdVersion: v1
-    namespaced: true
-  domain: baize.io
-  group: serving
-  kind: Model
-  path: baize.io/api/kube/api/serving/v1alpha1
-  version: v1alpha1
 version: "3"

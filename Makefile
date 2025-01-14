@@ -184,11 +184,10 @@ CODE_GENERATOR_PATH = $(shell go list -m -f '{{.Dir}}' k8s.io/code-generator)
 gen-client:
 	rm -rf ./client
 	go run $(CODE_GENERATOR_PATH)/cmd/client-gen \
-		--input=dataset/v1alpha1,serving/v1alpha1 \
+		--input=dataset/v1alpha1 \
 		--clientset-name=client \
 		--go-header-file=hack/boilerplate.go.txt \
-		-i baize.io/api/kube/api \
+		-i github.com/BaizeAI/dataset/api \
 		-o . \
-		-p baize.io/api/kube \
-		--input-base baize.io/api/kube/api
-	mv baize.io/api/kube/client . && rm -rf "baize.io"
+		-p github.com/BaizeAI/dataset/api \
+		--input-base github.com/BaizeAI/dataset/api

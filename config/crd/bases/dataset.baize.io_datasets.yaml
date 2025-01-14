@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
-  name: datasets.dataset.baize.io
+  name: datasets.dataset.baizeai.io
 spec:
-  group: dataset.baize.io
+  group: dataset.baizeai.io
   names:
     kind: Dataset
     listKind: DatasetList

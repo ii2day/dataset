@@ -20,8 +20,6 @@ import (
 	"flag"
 	"os"
 
-	"k8s.io/client-go/kubernetes"
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -37,7 +35,6 @@ import (
 	datasetv1alpha1 "github.com/BaizeAI/dataset/api/dataset/v1alpha1"
 
 	datasetcontroller "github.com/BaizeAI/dataset/internal/controller/dataset"
-	"github.com/BaizeAI/dataset/pkg/clients"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -95,15 +92,9 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-	cfg := clients.GetK8sConfigConfigWithFile("", "")
-	if cfg == nil {
-		setupLog.Error(err, "unable to get k8s config")
-		os.Exit(1)
-	}
 	if err = (&datasetcontroller.DatasetReconciler{
-		Client:     mgr.GetClient(),
-		Scheme:     mgr.GetScheme(),
-		KubeClient: kubernetes.NewForConfigOrDie(cfg),
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Dataset")
 		os.Exit(1)
