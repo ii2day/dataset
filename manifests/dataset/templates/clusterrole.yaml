@@ -30,3 +30,41 @@ rules:
       - get
       - patch
       - update
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - "*"
+  - apiGroups:
+      - "batch"
+    resources:
+      - "jobs"
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods"
+      - "persistentvolumeclaims"
+      - "secrets"
+      - "persistentvolumes"
+      - "configmaps"
+      - "services"
+      - "events"
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - "namespaces"
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - "apps"
+    resources:
+      - "deployments"
+    verbs:
+      - "*"

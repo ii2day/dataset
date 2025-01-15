@@ -64,10 +64,10 @@ controller:
   image:
     registry: ''
     repository: baizeai/dataset-controller
-    tag:
+    tag: latest
 
 dataloader:
   image:
     registry: ''
     repository: baizeai/dataset-data-loader
-    tag:
+    tag: latest

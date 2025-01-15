@@ -84,8 +84,9 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Tag helm chart image
+      - name: Tag helm chart image and copy crds
         run: |
+          cp -rf config/crd/bases/* $HELM_CHARTS_DIR/templates/
           image_tag=${{ steps.get_version.outputs.VERSION }}
           chart_version=${{ steps.get_version.outputs.VERSION }}
           sed -i "s/latest/${image_tag}/g" $HELM_CHARTS_DIR/values.yaml
