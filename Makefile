@@ -187,7 +187,6 @@ gen-client:
 		--input=dataset/v1alpha1 \
 		--clientset-name=client \
 		--go-header-file=hack/boilerplate.go.txt \
-		-i github.com/BaizeAI/dataset/api \
-		-o . \
-		-p github.com/BaizeAI/dataset/api \
+		--output-dir ./api \
+		--output-pkg github.com/BaizeAI/dataset/api \
 		--input-base github.com/BaizeAI/dataset/api
