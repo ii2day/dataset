@@ -18,6 +18,8 @@ package main
 
 import (
 	"flag"
+	config2 "github.com/BaizeAI/dataset/config"
+	"github.com/samber/lo"
 	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -68,14 +70,21 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	if err := config2.ParseConfigFromFile(config); err != nil {
+		setupLog.Error(err, "unable to load config")
+		os.Exit(1)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                  scheme,
-		Metrics:                 metricsserver.Options{BindAddress: metricsAddr},
-		HealthProbeBindAddress:  probeAddr,
-		LeaderElection:          enableLeaderElection,
-		LeaderElectionID:        "d227e0e2.baize.io",
-		LeaderElectionNamespace: "baize-system",
+		Scheme:                 scheme,
+		Metrics:                metricsserver.Options{BindAddress: metricsAddr},
+		HealthProbeBindAddress: probeAddr,
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       "d227e0e2.baizeai.io",
+		LeaderElectionNamespace: lo.CoalesceOrEmpty(os.Getenv("POD_NAMESPACE"), func() string {
+			bs, _ := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+			return string(bs)
+		}(), "default"),
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly

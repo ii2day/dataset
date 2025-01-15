@@ -1,0 +1,14 @@
+apiVersion: dataset.baizeai.io/v1alpha1
+kind: Dataset
+metadata:
+  name: gpt2-train-data
+spec:
+  dataSyncRound: 1
+  mountOptions:
+    gid: 1000
+    mode: "0774"
+    path: /
+    uid: 1000
+  source:
+    type: HTTP
+    uri: http://baize-ai.daocloud.io/gpt2-train-data/

@@ -19,6 +19,7 @@ package dataset
 import (
 	"context"
 	"fmt"
+	"github.com/BaizeAI/dataset/config"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -531,25 +532,7 @@ func (r *DatasetReconciler) reconcileJob(ctx context.Context, ds *datasetv1alpha
 		jobName := genJobName(ds.Name, ds.Status.InProcessingRound)
 
 		jobSpec := batchv1.JobSpec{}
-		err := yaml.Unmarshal([]byte(`
-backoffLimit: 4
-completionMode: NonIndexed
-completions: 1
-parallelism: 1
-template:
-  spec:
-    restartPolicy: Never
-    containers:
-    - image: ubuntu:20.04
-      command: ["/bin/bash", "-c", "echo 'Container args: '$(echo $@)"]
-      resources:
-        requests:
-          cpu: 100m
-          memory: 100Mi
-        limits:
-          cpu: 500m
-          memory: 500Mi
-`), &jobSpec)
+		err := yaml.Unmarshal([]byte(config.GetDatasetJobSpecYaml()), &jobSpec)
 		if err != nil {
 			log.Errorf("unmarshal dataset job spec yaml failed: %v", err)
 		}
