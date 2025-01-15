@@ -12,7 +12,7 @@ COPY go.sum go.sum
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o data-loader ./cmd/data-loader
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags "-s -w" -a -o data-loader ./cmd/data-loader
 
 FROM python:3.12
 
