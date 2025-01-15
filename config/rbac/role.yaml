@@ -5,9 +5,9 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - serving.baize.io
+  - dataset.baizeai.io
   resources:
-  - models
+  - datasets
   verbs:
   - create
   - delete
@@ -17,15 +17,15 @@ rules:
   - update
   - watch
 - apiGroups:
-  - serving.baize.io
+  - dataset.baizeai.io
   resources:
-  - models/finalizers
+  - datasets/finalizers
   verbs:
   - update
 - apiGroups:
-  - serving.baize.io
+  - dataset.baizeai.io
   resources:
-  - models/status
+  - datasets/status
   verbs:
   - get
   - patch
