@@ -403,58 +403,56 @@ spec:
 	ds.Status.PVCName = pvcName
 
 	// 除了 reference 类型外，其他都需要按模板创建 PVC
-	if ds.Spec.Source.Type != datasetv1alpha1.DatasetTypeReference {
-		pvc := &corev1.PersistentVolumeClaim{}
-		err := r.Get(ctx, client.ObjectKey{Namespace: ds.Namespace, Name: pvcName}, pvc)
-		if err != nil && !k8serrors.IsNotFound(err) {
+	pvc := &corev1.PersistentVolumeClaim{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: ds.Namespace, Name: pvcName}, pvc)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		return err
+	}
+
+	if spec == nil { // 普通模板
+		spec = ds.Spec.VolumeClaimTemplate.Spec.DeepCopy()
+		if len(spec.AccessModes) == 0 {
+			spec.AccessModes = []corev1.PersistentVolumeAccessMode{
+				corev1.ReadWriteMany,
+			}
+		}
+		if spec.VolumeMode == nil {
+			vm := corev1.PersistentVolumeFilesystem
+			spec.VolumeMode = &vm
+		}
+		if spec.Resources.Requests == nil {
+			spec.Resources.Requests = corev1.ResourceList{}
+		}
+		quantity := spec.Resources.Requests[corev1.ResourceStorage]
+		if quantity.IsZero() {
+			spec.Resources.Requests[corev1.ResourceStorage] = resource.MustParse("100Ti")
+		}
+		if forceStorageClass != "" {
+			// nfs 强制使用 nfs storageclass
+			spec.StorageClassName = lo.ToPtr(forceStorageClass)
+		}
+	}
+
+	if k8serrors.IsNotFound(err) {
+		// 不存在就创建
+		newPVC := &corev1.PersistentVolumeClaim{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      pvcName,
+				Namespace: ds.Namespace,
+				Labels: lo.Assign(ds.Labels, map[string]string{
+					constants.DatasetNameLabel: ds.Name,
+				}),
+				Annotations:     ds.Annotations,
+				OwnerReferences: datasetOwnerRef(ds),
+			},
+			Spec: *spec,
+		}
+		if err = r.Create(ctx, newPVC); err != nil {
 			return err
 		}
-
-		if spec == nil { // 普通模板
-			spec = ds.Spec.VolumeClaimTemplate.Spec.DeepCopy()
-			if len(spec.AccessModes) == 0 {
-				spec.AccessModes = []corev1.PersistentVolumeAccessMode{
-					corev1.ReadWriteMany,
-				}
-			}
-			if spec.VolumeMode == nil {
-				vm := corev1.PersistentVolumeFilesystem
-				spec.VolumeMode = &vm
-			}
-			if spec.Resources.Requests == nil {
-				spec.Resources.Requests = corev1.ResourceList{}
-			}
-			quantity := spec.Resources.Requests[corev1.ResourceStorage]
-			if quantity.IsZero() {
-				spec.Resources.Requests[corev1.ResourceStorage] = resource.MustParse("100Ti")
-			}
-			if forceStorageClass != "" {
-				// nfs 强制使用 nfs storageclass
-				spec.StorageClassName = lo.ToPtr(forceStorageClass)
-			}
-		}
-
-		if k8serrors.IsNotFound(err) {
-			// 不存在就创建
-			newPVC := &corev1.PersistentVolumeClaim{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      pvcName,
-					Namespace: ds.Namespace,
-					Labels: lo.Assign(ds.Labels, map[string]string{
-						constants.DatasetNameLabel: ds.Name,
-					}),
-					Annotations:     ds.Annotations,
-					OwnerReferences: datasetOwnerRef(ds),
-				},
-				Spec: *spec,
-			}
-			if err = r.Create(ctx, newPVC); err != nil {
-				return err
-			}
-		} else {
-			if pvc.Labels[constants.DatasetNameLabel] != ds.Name {
-				return fmt.Errorf("pvc %s already exists, but not belong to dataset %s", pvcName, ds.Name)
-			}
+	} else {
+		if pvc.Labels[constants.DatasetNameLabel] != ds.Name {
+			return fmt.Errorf("pvc %s already exists, but not belong to dataset %s", pvcName, ds.Name)
 		}
 	}
 
