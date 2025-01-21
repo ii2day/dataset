@@ -226,6 +226,8 @@ func (r *DatasetReconciler) reconcilePVC(ctx context.Context, ds *datasetv1alpha
 		newPv.Labels[constants.DatasetNameLabel] = ds.Name
 		newPv.ResourceVersion = ""
 		newPv.Spec.ClaimRef = nil
+		// 保留策略改为 Retain
+		newPv.Spec.PersistentVolumeReclaimPolicy = corev1.PersistentVolumeReclaimRetain
 		if err := r.Get(ctx, client.ObjectKey{Name: newPv.Name}, pv); err != nil {
 			if !k8serrors.IsNotFound(err) {
 				return err
