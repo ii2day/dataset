@@ -20,7 +20,7 @@ func SetCondition(conditions []metav1.Condition, typ string, err error) []metav1
 	if typ == "" {
 		return conditions
 	}
-	var index int = -1
+	index := -1
 	for i, c := range conditions {
 		if c.Type == typ {
 			index = i

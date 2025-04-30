@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/mitchellh/mapstructure"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -46,10 +47,13 @@ func ParseConfigFromFileContent(content string) error {
 	if err != nil {
 		return err
 	}
-	f.Write([]byte(content))
+	_, err = f.Write([]byte(content))
+	if err != nil {
+		return err
+	}
 	defer func() {
-		f.Close()
-		os.Remove(f.Name())
+		_ = f.Close()
+		_ = os.Remove(f.Name())
 	}()
 	return ParseConfigFromFile(f.Name())
 }

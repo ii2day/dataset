@@ -18,11 +18,13 @@ import (
 func TestCondaSync(t *testing.T) {
 	t.Run("sync full", func(t *testing.T) {
 		temDir, _ := os.MkdirTemp("", "test-data-*")
-		defer os.RemoveAll(temDir)
-		os.MkdirAll(temDir+"/test-env/conda/pkgs", 0700)
-		os.MkdirAll(temDir+"/root", 0700)
-		os.WriteFile(temDir+"/environment.yml", []byte("name: test-env\n"), 0600)
-		os.WriteFile(temDir+"/requirements.txt", []byte("foo\nbar\nbaz\n"), 0600)
+		defer func() {
+			assert.NoError(t, os.RemoveAll(temDir))
+		}()
+		require.NoError(t, os.MkdirAll(temDir+"/test-env/conda/pkgs", 0700))
+		require.NoError(t, os.MkdirAll(temDir+"/root", 0700))
+		require.NoError(t, os.WriteFile(temDir+"/environment.yml", []byte("name: test-env\n"), 0600))
+		require.NoError(t, os.WriteFile(temDir+"/requirements.txt", []byte("foo\nbar\nbaz\n"), 0600))
 		condaLoader, err := NewCondaLoader(map[string]string{
 			"name":                    "test-env",
 			"pythonVersion":           "999.999.999",
@@ -36,6 +38,7 @@ func TestCondaSync(t *testing.T) {
 		}, Secrets{})
 		assert.NoError(t, err)
 		fakeConda := fakeCommand{
+			t:   t,
 			cmd: "mamba",
 			outputs: []out{
 				{
@@ -81,8 +84,11 @@ func TestCondaSync(t *testing.T) {
 				},
 			},
 		}
-		defer fakeConda.Clean()
+		defer func() {
+			assert.NoError(t, fakeConda.Clean())
+		}()
 		fakePip := fakeCommand{
+			t:    t,
 			cmd:  "pip",
 			path: path.Join(condaLoader.loaderOptions.envPrefix(), "bin"),
 			outputs: []out{
@@ -95,8 +101,11 @@ func TestCondaSync(t *testing.T) {
 			},
 		}
 		assert.NoError(t, err)
-		defer fakePip.Clean()
+		defer func() {
+			assert.NoError(t, fakePip.Clean())
+		}()
 		fakeRclone := fakeCommand{
+			t:   t,
 			cmd: "rclone",
 			outputs: []out{
 				{
@@ -113,7 +122,9 @@ func TestCondaSync(t *testing.T) {
 				},
 			},
 		}
-		defer fakeRclone.Clean()
+		defer func() {
+			assert.NoError(t, fakeRclone.Clean())
+		}()
 		fakeConda.WithContext(func() {
 			fakePip.WithContext(func() {
 				fakeRclone.WithContext(func() {
@@ -186,7 +197,9 @@ func TestNewCondaLoader(t *testing.T) {
 	temDir, err := os.MkdirTemp("", "test-data-*")
 	require.NoError(t, err)
 	require.NotEmpty(t, temDir)
-	defer os.RemoveAll(temDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(temDir))
+	}()
 
 	err = os.WriteFile(temDir+"/environment.yml", []byte("name: test-env\n"), 0600)
 	require.NoError(t, err)

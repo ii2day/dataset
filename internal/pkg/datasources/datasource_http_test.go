@@ -26,6 +26,7 @@ func TestHTTPLoader(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	fakeHTTP := fakeCommand{
+		t:   t,
 		cmd: "rclone",
 		outputs: []out{
 			{
@@ -45,9 +46,13 @@ func TestHTTPLoader(t *testing.T) {
 			},
 		},
 	}
-	defer fakeHTTP.Clean()
+	defer func() {
+		assert.NoError(t, fakeHTTP.Clean())
+	}()
 	gitDir, _ := os.MkdirTemp("", "httpLoader-*")
-	defer os.RemoveAll(gitDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(gitDir))
+	}()
 	assert.NoError(t, err)
 	fakeHTTP.WithContext(func() {
 		err = httpLoader.Sync("http://test.com", gitDir)

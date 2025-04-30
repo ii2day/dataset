@@ -102,7 +102,9 @@ func (c *HubAPIClient) Login(ctx context.Context, token string) (*HubAPIBaseResp
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var response HubAPIBaseResponse[HubAPILoginResponse]
 	err = json.NewDecoder(resp.Body).Decode(&response)
