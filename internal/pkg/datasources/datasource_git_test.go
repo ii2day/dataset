@@ -35,6 +35,11 @@ func TestGitLoader(t *testing.T) {
 					stderr: "",
 					exit:   0,
 				},
+				{
+					stdout: "config",
+					stderr: "",
+					exit:   0,
+				},
 			},
 		}
 		defer fakeGit.Clean()
@@ -48,6 +53,7 @@ func TestGitLoader(t *testing.T) {
 		bbs := fakeGit.GetAllInputs()
 		assert.Equal(t, [][]byte{
 			[]byte(fmt.Sprintf("clone git://github.com/ndx-baize/baize.git %s --branch master -v\n", gitDir)),
+			[]byte("config --global safe.directory *\n"),
 			[]byte("config --local core.fileMode false\n"),
 			[]byte("remote set-url origin git://github.com/ndx-baize/baize.git\n"),
 		}, bbs)
@@ -76,6 +82,11 @@ func TestGitLoader(t *testing.T) {
 					stderr: "",
 					exit:   0,
 				},
+				{
+					stdout: "ok",
+					stderr: "",
+					exit:   0,
+				},
 			},
 		}
 		defer fakeGit.Clean()
@@ -89,6 +100,7 @@ func TestGitLoader(t *testing.T) {
 		bbs := fakeGit.GetAllInputs()
 		assert.Equal(t, [][]byte{
 			[]byte(fmt.Sprintf("clone git://github.com/ndx-baize/baize.git %s --branch master -v\n", gitDir)),
+			[]byte("config --global safe.directory *\n"),
 			[]byte("config --local core.fileMode false\n"),
 			[]byte("checkout 12345\n"),
 		}, bbs)

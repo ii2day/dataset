@@ -107,8 +107,15 @@ func preparePrivateKeyToSSHDir(sshPrivateKey, sshPrivateKeyPassphrase string) (s
 		return "", fmt.Errorf("failed to get user home directory, err: %s", err)
 	}
 
+	sshDir := filepath.Join(homeDir, ".ssh")
+
+	err = os.MkdirAll(sshDir, 0700)
+	if err != nil {
+		return "", fmt.Errorf("failed to create .ssh directory, err: %s", err)
+	}
+
 	privateKeyFileName := fmt.Sprintf("baize_data_loader_%s_id", utils.RandomHashString(8))
-	sshPrivateKeyFullPath := filepath.Join(homeDir, ".ssh", privateKeyFileName)
+	sshPrivateKeyFullPath := filepath.Join(sshDir, privateKeyFileName)
 
 	privateKeyBuffer := new(bytes.Buffer)
 
@@ -145,6 +152,7 @@ func preparePrivateKeyToSSHDir(sshPrivateKey, sshPrivateKeyPassphrase string) (s
 		}
 
 		privateKeyBuffer.WriteString(sshPrivateKey)
+		privateKeyBuffer.WriteString("\n")
 	}
 
 	return sshPrivateKeyFullPath, os.WriteFile(sshPrivateKeyFullPath, privateKeyBuffer.Bytes(), 0600)
@@ -495,6 +503,24 @@ func (d *GitLoader) pull(logger *logrus.Entry, alteredFromURI string, pullForPat
 	return utils.ExecuteCommand(logger, cmd, d.secrets())
 }
 
+func (d *GitLoader) configBeforeOperations(logger *logrus.Entry, finalizedGitDir string) error {
+	// Since data-loader should always be run as root (uid: 0, gid: 0),
+	// while after clone and pull, chmod and chown will be executed in
+	// order to alter the file mode and owner of the files, or contains
+	// files that were created or written by users with differed uid
+	// and gid, which would cause
+	// 	'fatal: detected dubious ownership in repository'
+	// error when performing later on git commands.
+	// Hence, we should set the safe.directory to * to avoid
+	// further errors.
+	err := d.configGlobalSetSafeDirectory(logger, finalizedGitDir, "*")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *GitLoader) syncWithClone(logger *logrus.Entry, fromURI string, alteredFromURI string, toPath string, finalizedGitDir string) error {
 	defer func() {
 		if (d.gitOptions.username != "" || d.gitOptions.password != "") || (d.gitOptions.token != "") {
@@ -506,6 +532,11 @@ func (d *GitLoader) syncWithClone(logger *logrus.Entry, fromURI string, alteredF
 	}()
 
 	err := d.clone(logger, alteredFromURI, toPath)
+	if err != nil {
+		return err
+	}
+
+	err = d.configBeforeOperations(logger, finalizedGitDir)
 	if err != nil {
 		return err
 	}
@@ -528,16 +559,7 @@ func (d *GitLoader) syncWithClone(logger *logrus.Entry, fromURI string, alteredF
 }
 
 func (d *GitLoader) syncWithPull(logger *logrus.Entry, _ string, alteredFromURI string, _ string, finalizedGitDir string) error {
-	// Since data-loader should always be run as root (uid: 0, gid: 0),
-	// while after clone and pull, chmod and chown will be executed in
-	// order to alter the file mode and owner of the files, or contains
-	// files that were created or written by users with differed uid
-	// and gid, which would cause
-	// 	'fatal: detected dubious ownership in repository'
-	// error when performing later on git commands.
-	// Hence, we should set the safe.directory to * to avoid
-	// further errors.
-	err := d.configGlobalSetSafeDirectory(logger, finalizedGitDir, "*")
+	err := d.configBeforeOperations(logger, finalizedGitDir)
 	if err != nil {
 		return err
 	}
