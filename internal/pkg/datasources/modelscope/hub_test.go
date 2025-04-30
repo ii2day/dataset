@@ -27,7 +27,7 @@ func TestLogin(t *testing.T) {
 			}
 
 			rw.WriteHeader(http.StatusOK)
-			rw.Write(lo.Must(json.Marshal(&HubAPIBaseResponse[HubAPILoginResponse]{
+			_, err := rw.Write(lo.Must(json.Marshal(&HubAPIBaseResponse[HubAPILoginResponse]{
 				Code: 200,
 				Data: &HubAPILoginResponse{
 					AccessToken: "token",
@@ -39,6 +39,7 @@ func TestLogin(t *testing.T) {
 				RequestID: uuid.New().String(),
 				Success:   true,
 			})))
+			require.NoError(t, err)
 		}))
 		defer server.Close()
 
@@ -70,12 +71,13 @@ func TestLogin(t *testing.T) {
 			}
 
 			rw.WriteHeader(http.StatusOK)
-			rw.Write(lo.Must(json.Marshal(&HubAPIBaseResponse[HubAPILoginResponse]{
+			_, err := rw.Write(lo.Must(json.Marshal(&HubAPIBaseResponse[HubAPILoginResponse]{
 				Code:      10010103009,
 				Message:   "登录失败，AccessToken错误，请从用户中心获取AccessToken或刷新",
 				RequestID: uuid.New().String(),
 				Success:   false,
 			})))
+			require.NoError(t, err)
 		}))
 		defer server.Close()
 

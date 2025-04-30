@@ -102,7 +102,9 @@ func (c *HfAPIClient) WhoAmI(ctx context.Context, token string) (*HfAPIWhoAmIRes
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	bodyBuffer := new(bytes.Buffer)
 	_, err = bodyBuffer.ReadFrom(resp.Body)

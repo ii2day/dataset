@@ -26,6 +26,7 @@ func TestS3Loader(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	fakeHTTP := fakeCommand{
+		t:   t,
 		cmd: "rclone",
 		outputs: []out{
 			{
@@ -45,9 +46,13 @@ func TestS3Loader(t *testing.T) {
 			},
 		},
 	}
-	defer fakeHTTP.Clean()
+	defer func() {
+		assert.NoError(t, fakeHTTP.Clean())
+	}()
 	s3Dir, _ := os.MkdirTemp("", "s3Loader-*")
-	defer os.RemoveAll(s3Dir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(s3Dir))
+	}()
 	assert.NoError(t, err)
 	fakeHTTP.WithContext(func() {
 		err = loader.Sync("s3://test-bucket", s3Dir)

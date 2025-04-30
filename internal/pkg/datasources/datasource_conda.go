@@ -15,6 +15,7 @@ import (
 
 	"github.com/BaizeAI/dataset/internal/pkg/constants"
 	"github.com/BaizeAI/dataset/internal/pkg/datasources/conda"
+	"github.com/BaizeAI/dataset/internal/pkg/datasources/pip"
 	"github.com/BaizeAI/dataset/pkg/log"
 	"github.com/BaizeAI/dataset/pkg/utils"
 )
@@ -96,7 +97,7 @@ type CondaLoader struct {
 
 	loaderOptions CondaLoaderOptions
 	mamba         *conda.MambaCLI
-	pip           *conda.PipCLI
+	pip           *pip.PipCLI
 }
 
 func NewCondaLoader(datasourceOption map[string]string, options Options, secrets Secrets) (*CondaLoader, error) {
@@ -111,7 +112,7 @@ func NewCondaLoader(datasourceOption map[string]string, options Options, secrets
 	loader.loaderOptions = loaderOptions
 
 	loader.mamba = conda.NewMambaCLI()
-	loader.pip = conda.NewPipCLIWithCondaEnv(loader.loaderOptions.envPrefix())
+	loader.pip = pip.NewPipCLIWithCondaEnv(loader.loaderOptions.envPrefix())
 	loader.tryReadFile()
 
 	return loader, nil

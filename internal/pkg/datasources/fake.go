@@ -6,7 +6,10 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"testing"
 	"text/template"
+
+	"github.com/stretchr/testify/require"
 )
 
 type out struct {
@@ -16,6 +19,8 @@ type out struct {
 }
 
 type fakeCommand struct {
+	t *testing.T
+
 	cmd     string
 	path    string
 	outputs []out
@@ -25,11 +30,11 @@ func (f *fakeCommand) Inject() error {
 	if f.path == "" {
 		f.path, _ = os.MkdirTemp("", "fakeCommand-*")
 	}
-	os.MkdirAll(f.path, 0755) // nolint: gosec
+	require.NoError(f.t, os.MkdirAll(f.path, 0755)) // nolint: gosec
 	for i, o := range f.outputs {
-		os.WriteFile(path.Join(f.path, fmt.Sprintf(".%s_output_%d", f.cmd, i)), []byte(o.stdout), 0600)
-		os.WriteFile(path.Join(f.path, fmt.Sprintf(".%s_stderr_%d", f.cmd, i)), []byte(o.stderr), 0600)
-		os.WriteFile(path.Join(f.path, fmt.Sprintf(".%s_exit_%d", f.cmd, i)), []byte(strconv.Itoa(o.exit)), 0600)
+		require.NoError(f.t, os.WriteFile(path.Join(f.path, fmt.Sprintf(".%s_output_%d", f.cmd, i)), []byte(o.stdout), 0600))
+		require.NoError(f.t, os.WriteFile(path.Join(f.path, fmt.Sprintf(".%s_stderr_%d", f.cmd, i)), []byte(o.stderr), 0600))
+		require.NoError(f.t, os.WriteFile(path.Join(f.path, fmt.Sprintf(".%s_exit_%d", f.cmd, i)), []byte(strconv.Itoa(o.exit)), 0600))
 	}
 	t, err := template.New("fakeCommand").Parse(
 		`
@@ -76,11 +81,11 @@ func (f *fakeCommand) GetAllInputs() [][]byte {
 }
 
 func (f *fakeCommand) WithContext(run func()) {
-	f.Inject()
+	require.NoError(f.t, f.Inject())
 	p := os.Getenv("PATH")
-	os.Setenv("PATH", fmt.Sprintf("%s:%s", f.path, p))
+	require.NoError(f.t, os.Setenv("PATH", fmt.Sprintf("%s:%s", f.path, p)))
 	run()
-	os.Setenv("PATH", p)
+	require.NoError(f.t, os.Setenv("PATH", p))
 }
 
 func (f *fakeCommand) Clean() error {

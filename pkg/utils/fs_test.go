@@ -13,7 +13,9 @@ func TestIsSymlink(t *testing.T) {
 	// Create a temporary directory
 	tempDir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(tempDir))
+	}()
 
 	// Create a regular file
 	regularFile := filepath.Join(tempDir, "regular")
@@ -39,7 +41,9 @@ func TestIsSymlink(t *testing.T) {
 func TestIsPermModeMatched(t *testing.T) {
 	tempFile, err := os.CreateTemp("", "test")
 	assert.NoError(t, err)
-	defer os.Remove(tempFile.Name())
+	defer func() {
+		assert.NoError(t, os.Remove(tempFile.Name()))
+	}()
 
 	err = tempFile.Chmod(0644)
 	assert.NoError(t, err)
@@ -55,7 +59,9 @@ func TestReadSymbolicLinkUntilRealPath(t *testing.T) {
 	// Create a temporary directory
 	tempDir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(tempDir))
+	}()
 
 	// Resolve the temporary directory to its real path
 	realTempDir, err := filepath.EvalSymlinks(tempDir)
@@ -94,7 +100,9 @@ func TestReadSymbolicLinkUntilRealPath(t *testing.T) {
 func TestChmodIfUnmatched(t *testing.T) {
 	tempFile, err := os.CreateTemp("", "test")
 	assert.NoError(t, err)
-	defer os.Remove(tempFile.Name())
+	defer func() {
+		assert.NoError(t, os.Remove(tempFile.Name()))
+	}()
 
 	logger := logrus.NewEntry(logrus.New())
 
@@ -121,7 +129,9 @@ func TestChmodIfUnmatched(t *testing.T) {
 func TestChmodAndChownRecursively(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(tempDir))
+	}()
 
 	logger := logrus.NewEntry(logrus.New())
 
@@ -151,7 +161,9 @@ func TestChmodAndChownRecursively(t *testing.T) {
 func TestCleanupNotExistingSymlinks(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(tempDir))
+	}()
 
 	logger := logrus.NewEntry(logrus.New())
 

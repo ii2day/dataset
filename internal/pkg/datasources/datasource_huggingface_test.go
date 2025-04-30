@@ -26,6 +26,7 @@ func TestHuggingFaceLoader(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	fakeHTTP := fakeCommand{
+		t:   t,
 		cmd: "huggingface-cli",
 		outputs: []out{
 			{
@@ -50,9 +51,13 @@ func TestHuggingFaceLoader(t *testing.T) {
 			},
 		},
 	}
-	defer fakeHTTP.Clean()
+	defer func() {
+		assert.NoError(t, fakeHTTP.Clean())
+	}()
 	huggingFaceDir, _ := os.MkdirTemp("", "huggingFaceLoader-*")
-	defer os.RemoveAll(huggingFaceDir)
+	defer func() {
+		assert.NoError(t, os.RemoveAll(huggingFaceDir))
+	}()
 	assert.NoError(t, err)
 	fakeHTTP.WithContext(func() {
 		err = loader.Sync("huggingface://ns/model", huggingFaceDir)

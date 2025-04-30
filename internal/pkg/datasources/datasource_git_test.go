@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGitLoader(t *testing.T) {
@@ -18,6 +19,7 @@ func TestGitLoader(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		fakeGit := fakeCommand{
+			t:   t,
 			cmd: "git",
 			outputs: []out{
 				{
@@ -42,9 +44,13 @@ func TestGitLoader(t *testing.T) {
 				},
 			},
 		}
-		defer fakeGit.Clean()
+		defer func() {
+			assert.NoError(t, fakeGit.Clean())
+		}()
 		gitDir, _ := os.MkdirTemp("", "git-*")
-		defer os.RemoveAll(gitDir)
+		defer func() {
+			assert.NoError(t, os.RemoveAll(gitDir))
+		}()
 		assert.NoError(t, err)
 		fakeGit.WithContext(func() {
 			err = git.Sync("git://github.com/ndx-baize/baize.git", gitDir)
@@ -65,6 +71,7 @@ func TestGitLoader(t *testing.T) {
 		}, Options{}, Secrets{})
 		assert.NoError(t, err)
 		fakeGit := fakeCommand{
+			t:   t,
 			cmd: "git",
 			outputs: []out{
 				{
@@ -89,9 +96,13 @@ func TestGitLoader(t *testing.T) {
 				},
 			},
 		}
-		defer fakeGit.Clean()
+		defer func() {
+			assert.NoError(t, fakeGit.Clean())
+		}()
 		gitDir, _ := os.MkdirTemp("", "git-*")
-		defer os.RemoveAll(gitDir)
+		defer func() {
+			assert.NoError(t, os.RemoveAll(gitDir))
+		}()
 		assert.NoError(t, err)
 		fakeGit.WithContext(func() {
 			err = git.Sync("git://github.com/ndx-baize/baize.git", gitDir)
@@ -111,6 +122,7 @@ func TestGitLoader(t *testing.T) {
 		}, Options{}, Secrets{})
 		assert.NoError(t, err)
 		fakeGit := fakeCommand{
+			t:   t,
 			cmd: "git",
 			outputs: []out{
 				{
@@ -150,10 +162,14 @@ func TestGitLoader(t *testing.T) {
 				},
 			},
 		}
-		defer fakeGit.Clean()
+		defer func() {
+			assert.NoError(t, fakeGit.Clean())
+		}()
 		gitDir, _ := os.MkdirTemp("", "git-*")
-		defer os.RemoveAll(gitDir)
-		os.Mkdir(gitDir+"/.git", 0755)
+		defer func() {
+			assert.NoError(t, os.RemoveAll(gitDir))
+		}()
+		require.NoError(t, os.Mkdir(gitDir+"/.git", 0755))
 		assert.NoError(t, err)
 		fakeGit.WithContext(func() {
 			err = git.Sync("git://github.com/ndx-baize/baize.git", gitDir)
@@ -178,6 +194,7 @@ func TestGitLoader(t *testing.T) {
 		git, err := NewGitLoader(map[string]string{}, Options{}, Secrets{})
 		assert.NoError(t, err)
 		fakeGit := fakeCommand{
+			t:   t,
 			cmd: "git",
 			outputs: []out{
 				{
@@ -222,10 +239,14 @@ func TestGitLoader(t *testing.T) {
 				},
 			},
 		}
-		defer fakeGit.Clean()
+		defer func() {
+			assert.NoError(t, fakeGit.Clean())
+		}()
 		gitDir, _ := os.MkdirTemp("", "git-*")
-		defer os.RemoveAll(gitDir)
-		os.Mkdir(gitDir+"/.git", 0755)
+		defer func() {
+			assert.NoError(t, os.RemoveAll(gitDir))
+		}()
+		require.NoError(t, os.Mkdir(gitDir+"/.git", 0755))
 		assert.NoError(t, err)
 		fakeGit.WithContext(func() {
 			err = git.Sync("git://github.com/ndx-baize/baize.git", gitDir)

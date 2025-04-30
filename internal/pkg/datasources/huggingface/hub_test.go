@@ -27,7 +27,7 @@ func TestWhoAmI(t *testing.T) {
 			}
 
 			rw.WriteHeader(http.StatusOK)
-			rw.Write(lo.Must(json.Marshal(&HfAPIWhoAmIResponse{
+			_, err := rw.Write(lo.Must(json.Marshal(&HfAPIWhoAmIResponse{
 				Auth: HfAPIWhoAmIResponseAuth{
 					AccessToken: HfAPIAccessToken{
 						CreatedAt:   time.Now(),
@@ -45,6 +45,7 @@ func TestWhoAmI(t *testing.T) {
 				Name:          "username",
 				Type:          "user",
 			})))
+			require.NoError(t, err)
 		}))
 		defer server.Close()
 
@@ -83,9 +84,10 @@ func TestWhoAmI(t *testing.T) {
 			}
 
 			rw.WriteHeader(http.StatusOK)
-			rw.Write(lo.Must(json.Marshal(&HfAPIErrorResponse{
+			_, err := rw.Write(lo.Must(json.Marshal(&HfAPIErrorResponse{
 				Error: "Invalid username or password.",
 			})))
+			require.NoError(t, err)
 		}))
 		defer server.Close()
 

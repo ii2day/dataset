@@ -1,4 +1,4 @@
-package conda
+package pip
 
 import (
 	"os"

@@ -25,7 +25,9 @@ func ExecuteCommandWithAllOutput(logger *logrus.Entry, cmd *exec.Cmd, secrets []
 	if err != nil {
 		return outBuffer, errBuffer, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 	bs := make([]byte, 4)
 	_, err = f.Read(bs)
 	if err != nil {

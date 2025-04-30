@@ -19,7 +19,7 @@ func datasetConfigMapName(ds *datasetv1alpha1.Dataset) string {
 
 func (r *DatasetReconciler) getConfigMap(ctx context.Context, ds *datasetv1alpha1.Dataset) (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{}
-	err := r.Client.Get(ctx, client.ObjectKey{
+	err := r.Get(ctx, client.ObjectKey{
 		Namespace: ds.Namespace,
 		Name:      datasetConfigMapName(ds),
 	}, cm)
@@ -75,7 +75,7 @@ func (r *DatasetReconciler) createConfigMap(ctx context.Context, ds *datasetv1al
 		cm.Data[constants.DatasetJobCondaPipRequirementsTxtFilename] = *defaultOpts.requirementsTxt
 	}
 
-	err := r.Client.Create(ctx, cm)
+	err := r.Create(ctx, cm)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (r *DatasetReconciler) updateConfigMap(ctx context.Context, cm *corev1.Conf
 		cm.Data[constants.DatasetJobCondaPipRequirementsTxtFilename] = *defaultOpts.requirementsTxt
 	}
 
-	err := r.Client.Update(ctx, cm)
+	err := r.Update(ctx, cm)
 	if err != nil {
 		return nil, err
 	}
