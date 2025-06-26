@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags "-s -w" -a -o data-loader ./cmd/data-loader
 
-FROM python:3.12
+FROM python:3.13
 
 RUN pip install --no-cache-dir "huggingface_hub[cli]"==0.33.1 modelscope==1.27.1 setuptools && \
     rclone_version=v1.70.1 && \
