@@ -1,6 +1,6 @@
 module github.com/BaizeAI/dataset
 
-go 1.24.4
+go 1.24.5
 
 require (
 	github.com/go-viper/mapstructure/v2 v2.3.0
