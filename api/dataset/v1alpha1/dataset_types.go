@@ -126,7 +126,8 @@ type DatasetSpec struct {
 	// mountOptions is the options for mounting the dataset.
 	MountOptions MountOptions `json:"mountOptions,omitempty"`
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:XValidation:rule="self - oldSelf <= 1",message="dataSyncRound can only be incremented by 1"
+	// +kubebuilder:validation:XValidation:rule="self > 0 && self - oldSelf <= 1",message="dataSyncRound can only be incremented by 1"
+	// +kubebuilder:default=1
 	// dataSyncRound is the number of data sync rounds to be performed."
 	DataSyncRound int32 `json:"dataSyncRound,omitempty"`
 	// +kubebuilder:validation:Optional
