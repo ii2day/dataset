@@ -199,12 +199,12 @@ func (d *S3Loader) Sync(fromURI string, toPath string) error {
 	}
 
 	args := []string{
-		"sync",
+		"copy",
 		filepath.Join(fmt.Sprintf("%s:%s", configName, bucket), objectDir),
 		toPath,
 	}
 
-	args = append(args, "-vvv", "-u")
+	args = append(args, "-vvv")
 	cmd := exec.Command("rclone", args...)
 	cmd.Dir = d.Options.Root
 
