@@ -204,7 +204,7 @@ func (d *S3Loader) Sync(fromURI string, toPath string) error {
 		toPath,
 	}
 
-	args = append(args, "-vvv")
+	args = append(args, "-vvv", "-u")
 	cmd := exec.Command("rclone", args...)
 	cmd.Dir = d.Options.Root
 
